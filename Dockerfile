@@ -1,7 +1,10 @@
 FROM ubuntu:18.04
 
+# Update OS
 RUN apt update
 RUN apt dist-upgrade --purge -y
+
+# Install OS dependencies
 RUN apt install -y \
     ffmpeg \
     sox \
@@ -25,17 +28,22 @@ RUN curl -sSL https://get.haskellstack.org/ | sh
 RUN apt install -y git
 RUN apt clean
 
+# Set up directory
 RUN mkdir -p /app
 WORKDIR /app
 
+# Cache stack until stack.yml changes
 COPY stack.yaml /app/
 RUN stack setup
 
+# Cache build dependencies until *.cabal change
 COPY *.cabal /app/
 RUN stack build --only-dependencies
 
+# Build
 COPY . /app/
 RUN stack install
 
+# Default command
 CMD /root/.local/bin/komposition
 
